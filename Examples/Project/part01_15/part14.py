@@ -47,3 +47,41 @@ def main02():
         print(str(addr) + '连接到了服务器')
         client.send(str(datetime.datetime.now()).encode('utf-8'))
         client.close()
+
+
+# ---------------------------------------
+#  示例3  使用socket
+# ---------------------------------------
+from socket import socket, SOCK_STREAM, AF_INET
+from base64 import b64encode, b64decode
+from json import dumps, loads
+from threading import Thread
+
+
+def main03():
+    class FileTransferHandler(Thread):
+        def __init__(self, cclient):
+            super().__init__()
+            self.cclient = cclient
+
+        def run(self):
+            my_dict = {}
+            my_dict["filename"] = "part_14_ex01.jpg"
+            my_dict["filedata"] = data
+            json_str = dumps(my_dict)
+            self.cclient.send(json_str.encode('utf-8'))
+            self.cclient.close()
+
+    server = socket()
+    server.bind(('192.168.1.132', 5566))
+    server.listen(512)
+    print('服务器开始监听')
+    with open('../part_14_ex01.jpg', 'rb') as f:
+        data = b64encode(f.read()).decode('utf-8')
+    while True:
+        client, addr = server.accept()
+        FileTransferHandler(client).start()
+
+
+if __name__=="__main__":
+    main03()
